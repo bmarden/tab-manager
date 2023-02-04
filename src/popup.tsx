@@ -41,8 +41,14 @@ function IndexPopup() {
   };
 
   const handleUngroupTabs = async () => {
-    const currentGroupedTabs = await chrome.tabs.query({ currentWindow: true });
+    const currentGroupedTabs = await chrome.tabGroups.query({});
     console.log(currentGroupedTabs);
+
+    // Ungroup all the tabs in currentGroupedTabs
+    currentGroupedTabs.forEach(async (group) => {
+      const tabs = await chrome.tabs.query({ groupId: group.id });
+      await chrome.tabs.ungroup(tabs.map((tab) => tab.id));
+    });
   };
 
   return (
