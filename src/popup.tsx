@@ -1,43 +1,49 @@
-import { useEffect, useReducer, useState } from "react"
+import { useEffect, useReducer, useState } from "react";
 
-import "./style.css"
+import "./style.css";
 
 function IndexPopup() {
   // const [tabs, setTabs] = useState<chrome.tabs.Tab[]>([])
-  const [tabGroups, setTabGroups] = useState<chrome.tabGroups.TabGroup[]>([])
+  const [tabGroups, setTabGroups] = useState<chrome.tabGroups.TabGroup[]>([]);
 
-  // useEffect(() => {
-  //   chrome.tabs.query({ currentWindow: true }, (tabs) => {
-  //     setTabs(tabs)
-  //   })
-  // }, [])
+  useEffect(() => {
+    const setup = async () => {
+      const groups = await chrome.tabGroups.query({});
+      if (groups) {
+        setTabGroups(groups);
+      }
+    };
+
+    setup();
+  }, []);
 
   const handleTabGroup = async () => {
-    const domains = new Map<string, chrome.tabs.Tab[]>()
-    const tabs = await chrome.tabs.query({ currentWindow: true })
+    const domains = new Map<string, chrome.tabs.Tab[]>();
+    const tabs = await chrome.tabs.query({ currentWindow: true });
 
     // Get the base domain of each tab and put into the domains Set
     tabs.forEach((tab) => {
-      const url = new URL(tab.url)
+      const url = new URL(tab.url);
 
       if (domains.has(url.hostname)) {
-        domains.get(url.hostname).push(tab)
+        domains.get(url.hostname).push(tab);
       } else {
-        domains.set(url.hostname, [tab])
+        domains.set(url.hostname, [tab]);
       }
-    })
+    });
 
     for (const [domain, tabs] of domains) {
       const group = await chrome.tabs.group({
         tabIds: tabs.map((tab) => tab.id)
-      })
-      await chrome.tabGroups.update(group, { title: domain })
+      });
+      await chrome.tabGroups.update(group, { title: domain });
     }
-  }
+  };
 
   const handleUngroupTabs = async () => {
-    const currentGroupedTabs = await chrome.tabs.query({ currentWindow: true })
-  }
+    const currentGroupedTabs = await chrome.tabs.query({ currentWindow: true });
+    console.log(currentGroupedTabs);
+  };
 
   return (
     <div className="w-52">
@@ -61,7 +67,7 @@ function IndexPopup() {
         </button>
       </div>
     </div>
-  )
+  );
 }
 
-export default IndexPopup
+export default IndexPopup;
